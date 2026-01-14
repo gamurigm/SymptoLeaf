@@ -1,3 +1,6 @@
+// Sistema de temas personalizado - Agregado: 10 Enero 2026
+// Define el esquema de colores y estilos de la aplicación
+
 import 'package:flutter/material.dart';
 import 'esquema_color.dart';
 

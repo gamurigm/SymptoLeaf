@@ -1,3 +1,7 @@
+// Servicio Gemini AI - Agregado: 13-14 Enero 2026
+// Proporciona recomendaciones de tratamiento y chatbot agrícola
+// Usa patrón Singleton para optimizar cuota de API gratuita
+
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../../config/gemini_config.dart';
 import '../models/treatment_model.dart';

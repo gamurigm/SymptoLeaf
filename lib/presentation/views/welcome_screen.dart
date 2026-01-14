@@ -1,3 +1,6 @@
+// Welcome Screen con animaciones - Agregado: 9 Enero 2026
+// Primera mejora visual sobre el diseño base
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../temas/esquema_color.dart';

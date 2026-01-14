@@ -1,3 +1,7 @@
+// Datasource para modelo ONNX - Migrado: 12 Enero 2026 02:15 AM
+// ⭐ Fix crítico: Reemplazó TFLite que no funcionaba
+// Ahora el modo local funciona completamente offline con ONNX Runtime
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
