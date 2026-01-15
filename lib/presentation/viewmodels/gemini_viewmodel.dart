@@ -23,6 +23,7 @@ class GeminiViewModel extends ChangeNotifier {
   final List<ChatMessage> _messages = [];
   String _chatError = '';
   String? _currentDiagnosisContext;
+  bool _chatStarted = false;
 
   // Getters para tratamiento
   GeminiState get treatmentState => _treatmentState;
@@ -91,8 +92,14 @@ class GeminiViewModel extends ChangeNotifier {
 
   /// Inicia el chat con contexto del diagnóstico
   Future<void> startChat({String? plant, String? disease}) async {
+    // Evitar iniciar el chat múltiples veces
+    if (_chatStarted && _geminiService.isChatActive) {
+      return;
+    }
+    
     _messages.clear();
     _chatError = '';
+    _chatStarted = false;
     
     // Inicializar si es necesario
     if (!_isInitialized && !_initializationFailed) {
@@ -123,6 +130,8 @@ class GeminiViewModel extends ChangeNotifier {
         '• 🌱 Consejos de cultivo'
       ));
     }
+    
+    _chatStarted = true;
     notifyListeners();
   }
 
@@ -162,6 +171,8 @@ class GeminiViewModel extends ChangeNotifier {
     _messages.clear();
     _chatState = GeminiState.idle;
     _chatError = '';
+    _chatStarted = false;
+    _geminiService.endChat();
     notifyListeners();
   }
 

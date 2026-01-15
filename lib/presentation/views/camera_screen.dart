@@ -1,87 +1,22 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import '../controllers/foto_controller.dart';
+import '../providers/foto_provider.dart';
+import '../widgets/foto_item.dart';
 import '../viewmodels/prediction_viewmodel.dart';
 import '../temas/esquema_color.dart';
 import '../temas/tipografia.dart';
 
-class CameraScreen extends StatefulWidget {
+class CameraScreen extends StatelessWidget {
   const CameraScreen({Key? key}) : super(key: key);
 
   @override
-  State<CameraScreen> createState() => _CameraScreenState();
-}
-
-class _CameraScreenState extends State<CameraScreen> {
-  final ImagePicker _picker = ImagePicker();
-  List<XFile> _fotos = [];
-
-  Future<void> _tomarFoto() async {
-    final XFile? foto = await _picker.pickImage(
-      source: ImageSource.camera,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
-    );
-
-    if (foto != null) {
-      setState(() {
-        _fotos.add(foto);
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Foto capturada correctamente'),
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  Future<void> _seleccionarGaleria() async {
-    final XFile? foto = await _picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
-    );
-
-    if (foto != null) {
-      setState(() {
-        _fotos.add(foto);
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Imagen seleccionada de la galería'),
-          behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  void _analizarFoto(XFile foto) {
-    final predictionViewModel = Provider.of<PredictionViewModel>(context, listen: false);
-    predictionViewModel.predictDisease(foto.path);
-    Navigator.of(context).pushNamed('/result');
-  }
-
-  void _eliminarFoto(int index) {
-    setState(() {
-      _fotos.removeAt(index);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<FotoProvider>(context);
+    final controller = FotoController(provider);
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis Fotografías'),
-      ),
-      body: _fotos.isEmpty
+      body: provider.fotos.isEmpty
           ? Container(
               decoration: const BoxDecoration(
                 gradient: EsquemaColor.backgroundGradient,
@@ -130,87 +65,34 @@ class _CameraScreenState extends State<CameraScreen> {
               ),
             )
           : ListView.builder(
-              itemCount: _fotos.length,
+              itemCount: provider.fotos.length,
               padding: const EdgeInsets.all(16),
               itemBuilder: (context, index) {
-                final foto = _fotos[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(16),
-                        ),
-                        child: Image.file(
-                          File(foto.path),
-                          width: double.infinity,
-                          height: 250,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Foto ${index + 1}',
-                              style: Tipografia.titulo3,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Capturada el ${DateTime.now().toString().split('.')[0]}',
-                              style: Tipografia.caption.copyWith(
-                                color: EsquemaColor.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                TextButton.icon(
-                                  onPressed: () => _eliminarFoto(index),
-                                  icon: const Icon(Icons.delete, size: 20),
-                                  label: const Text('Eliminar'),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: EsquemaColor.diseaseRed,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                ElevatedButton.icon(
-                                  onPressed: () => _analizarFoto(foto),
-                                  icon: const Icon(Icons.search, size: 20),
-                                  label: const Text('Analizar'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: EsquemaColor.primaryGreen,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                final foto = provider.fotos[index];
+                return FotoItem(
+                  foto: foto,
+                  onAnalizar: () {
+                    final predictionViewModel = Provider.of<PredictionViewModel>(context, listen: false);
+                    predictionViewModel.predictDisease(foto.path);
+                    Navigator.of(context).pushNamed('/result');
+                  },
+                  onEliminar: () => provider.eliminarFoto(index),
                 );
               },
             ),
-      // FloatingActionButtons en la parte inferior derecha
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
             heroTag: 'gallery',
-            onPressed: _seleccionarGaleria,
+            onPressed: () => controller.seleccionarGaleria(context),
             backgroundColor: EsquemaColor.lightGreen,
             child: const Icon(Icons.photo_library),
           ),
           const SizedBox(height: 12),
           FloatingActionButton(
             heroTag: 'camera',
-            onPressed: _tomarFoto,
+            onPressed: () => controller.tomarFoto(context),
             child: const Icon(Icons.camera_alt),
           ),
         ],

@@ -99,6 +99,7 @@ flutter:
     - assets/modelo/clases.json
     - assets/modelo/clases_es.json
     - assets/animations/
+    - assets/icon/
     - lib/.keyapigemeni
 
   # An image asset can refer to one or more resolution-specific "variants", see

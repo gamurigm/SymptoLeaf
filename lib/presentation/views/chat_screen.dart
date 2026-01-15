@@ -16,20 +16,27 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
+  bool _chatInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
-      final geminiViewModel = Provider.of<GeminiViewModel>(context, listen: false);
-      
-      geminiViewModel.startChat(
-        plant: args?['plant'],
-        disease: args?['disease'],
-      );
-    });
   }
+
+  void _initializeChatIfNeeded(BuildContext context) {
+    if (_chatInitialized) return;
+    
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
+    final geminiViewModel = Provider.of<GeminiViewModel>(context, listen: false);
+    
+    geminiViewModel.startChat(
+      plant: args?['plant'],
+      disease: args?['disease'],
+    );
+    
+    _chatInitialized = true;
+  }
+
 
   @override
   void dispose() {
@@ -83,6 +90,11 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         child: Consumer<GeminiViewModel>(
           builder: (context, viewModel, child) {
+            // Inicializar el chat solo una vez
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _initializeChatIfNeeded(context);
+            });
+            
             if (!viewModel.isConfigured) {
               return _buildNotConfigured();
             }

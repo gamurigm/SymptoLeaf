@@ -26,8 +26,10 @@ class GeminiService {
   ChatSession? _chatSession;
   bool _isInitialized = false;
   bool _initializationAttempted = false;
+  bool _isChatActive = false;
 
   /// Inicializa el modelo (debe llamarse antes de usar)
+  /// SIN systemInstruction para ahorrar tokens en cada solicitud
   Future<void> initialize() async {
     if (_initializationAttempted) return;
     _initializationAttempted = true;
@@ -35,10 +37,10 @@ class GeminiService {
     try {
       final apiKey = await GeminiConfig.loadApiKey();
       
+      // Sin systemInstruction = menos tokens por solicitud
       _model = GenerativeModel(
         model: GeminiConfig.model,
         apiKey: apiKey,
-        systemInstruction: Content.text(GeminiConfig.systemPrompt),
       );
       _isInitialized = true;
     } catch (e) {
@@ -49,15 +51,30 @@ class GeminiService {
 
   bool get isConfigured => _isInitialized;
 
+  /// Verifica si hay una sesión de chat activa
+  bool get isChatActive => _isChatActive;
+
   /// Inicia una nueva sesión de chat
   void startNewChat({String? initialContext}) {
     if (!isConfigured) return;
+    
+    // Solo crear nueva sesión si no hay una activa
+    if (_isChatActive) {
+      return;
+    }
     
     _chatSession = _model!.startChat(
       history: initialContext != null
           ? [Content.text('Contexto: $initialContext')]
           : [],
     );
+    _isChatActive = true;
+  }
+
+  /// Finaliza la sesión de chat actual
+  void endChat() {
+    _chatSession = null;
+    _isChatActive = false;
   }
 
   /// Obtiene recomendaciones de tratamiento para una enfermedad
@@ -69,22 +86,8 @@ class GeminiService {
       throw Exception('API Key de Gemini no configurada. Ve a lib/config/gemini_config.dart');
     }
 
-    final prompt = '''
-Soy un agricultor y necesito ayuda urgente.
-
-Mi planta de **$plant** tiene **$disease**.
-
-Por favor proporciona:
-
-1. 🔍 **SÍNTOMAS** comunes de esta enfermedad (lista con -)
-2. 💊 **TRATAMIENTOS** recomendados:
-   - 🌿 Opciones orgánicas/naturales
-   - 🧪 Opciones químicas (con nombres comerciales si es posible) 
-3. 🛡️ **PREVENCIÓN** para evitar que vuelva a ocurrir (lista con -)
-4. ⏰ **MOMENTO** ideal para aplicar el tratamiento
-
-Responde de forma clara y práctica para un agricultor.
-''';
+    // Prompt simplificado para consumir menos tokens de la cuota gratuita
+    final prompt = 'Tratamiento breve para $disease en $plant. Incluye: 1 remedio casero y 1 químico.';
 
     try {
       final response = await _model!.generateContent([Content.text(prompt)]);

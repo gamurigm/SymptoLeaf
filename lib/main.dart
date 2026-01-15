@@ -8,8 +8,10 @@ import 'domain/use_case/predict_disease_usecase.dart';
 import 'presentation/viewmodels/prediction_viewmodel.dart';
 import 'presentation/viewmodels/settings_viewmodel.dart';
 import 'presentation/viewmodels/gemini_viewmodel.dart';
+import 'presentation/providers/foto_provider.dart';
 import 'presentation/routes/app_routes.dart';
 import 'presentation/temas/tema_general.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -22,6 +24,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // Foto Provider para manejo de cámara (MVC Pattern)
+        ChangeNotifierProvider(
+          create: (_) => FotoProvider(),
+        ),
+        
         // Settings ViewModel
         ChangeNotifierProvider(
           create: (_) => SettingsViewModel(),
@@ -54,7 +61,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'SymptoLeaf',
         theme: TemaGeneral.lightTheme,
-        initialRoute: AppRoutes.welcome,
+        initialRoute: AppRoutes.main,
         routes: AppRoutes.routes,
       ),
     );
