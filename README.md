@@ -23,6 +23,17 @@
 
 **SymptoLeaf** es una aplicación Flutter que utiliza inteligencia artificial para identificar enfermedades en plantas a través del análisis de imágenes. Simplemente toma una foto de la hoja afectada y obtén un diagnóstico instantáneo directamente en tu dispositivo, sin necesidad de conexión a internet.
 
+## 📸 Capturas de Pantalla
+
+<div align="center">
+
+![SymptoLeaf App Showcase](assets/screenshots/app_showcase.png)
+
+*Interfaz principal de SymptoLeaf: Inicio, Galería de Fotos y Perfil de Usuario*
+
+</div>
+
+
 ## ✨ Características
 
 - 🔍 **Detección en tiempo real** - Análisis instantáneo de enfermedades en plantas
